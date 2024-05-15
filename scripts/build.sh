@@ -24,7 +24,7 @@ cat Cargo.toml | sed "s/version = \"${toml_version}\"$/version = \"${tag_version
 mv Cargo2.toml Cargo.toml
 
 build_version="v${tag_version}"
-build_target="x86_64-apple-darwin"
+build_target="arm64-apple-darwin"
 build_path="target/${build_target}/release"
 binary_name="gfb"
 build_basename="${binary_name}-${build_version}-${build_target}"
