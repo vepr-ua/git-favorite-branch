@@ -5,6 +5,7 @@ use git_helpers::get_local_hash;
 pub mod cli_definitions;
 pub mod command_manager;
 pub mod config;
+pub mod errors;
 pub mod git_helpers;
 
 pub fn get_default_path() -> String {

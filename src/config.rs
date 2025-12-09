@@ -5,6 +5,8 @@ use std::{
     path::Path,
 };
 
+use crate::errors::{GFBError, Result};
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
@@ -23,52 +25,44 @@ impl Config {
         }
     }
 
-    pub fn save(&self) {
-        let ref file_path = Path::new(&self.path_to_config);
-        let file = File::create(file_path).expect(
-            format!(
-                "Unable to create config file in {}",
-                file_path.to_str().unwrap()
-            )
-            .as_str(),
-        );
+    pub fn save(&self) -> Result<()> {
+        let file = File::create(&self.path_to_config)
+            .map_err(|e| GFBError::ConfigSavedFailed(e.to_string()))?;
+
         let writer = BufWriter::new(file);
-        serde_json::to_writer_pretty(writer, &self).expect("Failed to save config")
+        serde_json::to_writer_pretty(writer, &self)
+            .map_err(|e| GFBError::ConfigSavedFailed(e.to_string()))?;
+
+        Ok(())
     }
 
-    pub fn load(&mut self) {
+    pub fn load(&mut self) -> Result<()> {
         let file_path = Path::new(&self.path_to_config);
-        let file = self.create_file_if_none_exist(file_path);
+        let file = self.create_file_if_none_exist(file_path)?;
 
         let reader = BufReader::new(file);
-        let config: Config = serde_json::from_reader(reader).expect("Failed to parse config");
+        let config: Config = serde_json::from_reader(reader)
+            .map_err(|e| GFBError::ConfigLoadFailed(e.to_string()))?;
 
         self.state = config.state;
         self.path_to_config = config.path_to_config;
+        Ok(())
     }
 
-    fn create_file_if_none_exist(&self, formatted_file_path: &Path) -> File {
-        let file = match File::open(formatted_file_path) {
-            Err(err) => {
-                eprintln!("Failed to open config: {:?}", err);
-                eprintln!(
-                    "Creating new config {}",
-                    formatted_file_path.to_str().unwrap()
-                );
-                let new_file = File::create(formatted_file_path).expect(
-                    format!(
-                        "Unable to create config file in {}",
-                        formatted_file_path.to_str().unwrap()
-                    )
-                    .as_str(),
-                );
-                let writer = BufWriter::new(&new_file);
-                serde_json::to_writer_pretty(writer, &self).expect("Failed to save config");
-                File::open(formatted_file_path).expect("Unable to open newly created file")
-            }
-            Ok(file) => file,
-        };
+    fn create_file_if_none_exist(&self, formatted_file_path: &Path) -> Result<File> {
+        if let Ok(file) = File::open(formatted_file_path) {
+            return Ok(file);
+        }
 
-        file
+        let new_file = File::create(formatted_file_path)
+            .map_err(|e| GFBError::ConfigCreateFailed(e.to_string()))?;
+
+        let writer = BufWriter::new(&new_file);
+        serde_json::to_writer_pretty(writer, &self)
+            .map_err(|e| GFBError::ConfigCreateFailed(e.to_string()))?;
+
+        File::open(formatted_file_path).map_err(|_| {
+            GFBError::ConfigCreateFailed("Unable to open newly created file".to_string())
+        })
     }
 }

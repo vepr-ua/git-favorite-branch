@@ -3,13 +3,13 @@ authors = ["Revent Studio", "Maks Yadvinskyy <maks@revent.studio>"]
 categories = ["command-line-utilities"]
 description = "Tiny CLI for enforcing branching name strategy across multiple git repositories"
 edition = "2021"
-homepage = "https://github.com/byte-partisan/git-favorite-branch"
+homepage = "https://github.com/vepr-ua/git-favorite-branch"
 keywords = ["git_tool", "branch", "git_branch", "multibranch", "managment"]
 license-file = "LICENSE.txt"
 name = "gfb"
 readme = "README.md"
-repository = "https://github.com/byte-partisan/git-favorite-branch"
-version = "1.1.7"
+repository = "https://github.com/vepr-ua/git-favorite-branch"
+version = "1.2.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
