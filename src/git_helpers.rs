@@ -9,8 +9,23 @@ pub fn get_current_branch() -> Result<String> {
         .output()
         .map_err(|e| GFBError::IOError(e))?;
 
-    String::from_utf8(branch_name_raw.stdout)
-        .map_err(|e| GFBError::CurrentBranchResolveFailed(e.to_string()))
+    if !branch_name_raw.status.success() {
+        let stderr = String::from_utf8_lossy(&branch_name_raw.stderr);
+        return Err(GFBError::CurrentBranchResolveFailed(
+            stderr.trim().to_owned(),
+        ));
+    }
+
+    let name = String::from_utf8(branch_name_raw.stdout)
+        .map_err(|e| GFBError::CurrentBranchResolveFailed(e.to_string()))?;
+
+    if name.trim().is_empty() {
+        return Err(GFBError::CurrentBranchResolveFailed(
+            "HEAD is detached".to_owned(),
+        ));
+    }
+
+    Ok(name)
 }
 
 pub fn switch_branch(branch_name: &str) -> Result<ExitStatus> {

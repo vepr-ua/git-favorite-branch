@@ -1,7 +1,7 @@
 use crate::{
     config::Config,
     errors::{GFBError, Result},
-    git_helpers::{create_branch, switch_branch},
+    git_helpers::{create_branch, get_current_branch, switch_branch},
 };
 use std::collections::HashMap;
 
@@ -17,7 +17,7 @@ impl CommandManager {
 
     pub fn switch_to_branch(&self, key: String) -> Result<()> {
         let Some(branch_name) = self.config.state.get(&key) else {
-            return Err(GFBError::KeyNotFound(key))?;
+            return Err(GFBError::KeyNotFound(Some(key)))?;
         };
 
         switch_branch(branch_name)?;
@@ -27,7 +27,7 @@ impl CommandManager {
 
     pub fn delete_branch(&mut self, key: String) -> Result<()> {
         let Some(_) = self.config.state.remove(&key) else {
-            return Err(GFBError::KeyNotFound(key));
+            return Err(GFBError::KeyNotFound(Some(key)));
         };
 
         self.config.save()
@@ -38,7 +38,7 @@ impl CommandManager {
             .config
             .state
             .get(&key)
-            .ok_or_else(|| GFBError::KeyNotFound(key))?;
+            .ok_or_else(|| GFBError::KeyNotFound(Some(key)))?;
 
         create_branch(branch_name)?;
         Ok(())
@@ -61,9 +61,58 @@ impl CommandManager {
 
     pub fn print_branch_name(&self, key: String) -> Result<String> {
         let Some(branch_name) = self.config.state.get(&key) else {
-            return Err(GFBError::KeyNotFound(key));
+            return Err(GFBError::KeyNotFound(Some(key)));
         };
 
         Ok(branch_name.to_string())
+    }
+
+    pub fn rename_key(&mut self, new_key: &str, old_key: Option<&str>) -> Result<(String, String)> {
+        let old_key = match old_key {
+            Some(key) => key.to_owned(),
+            None => self.infer_key_from_branch()?,
+        };
+
+        if !self.config.state.contains_key(&old_key) {
+            return Err(GFBError::KeyNotFound(Some(old_key)));
+        }
+
+        if old_key == new_key {
+            return Ok((old_key, new_key.to_owned()));
+        }
+
+        if self.config.state.contains_key(new_key) {
+            return Err(GFBError::KeyAlreadyExists(new_key.to_string()));
+        }
+
+        let value = self
+            .config
+            .state
+            .remove(&old_key)
+            .ok_or(GFBError::KeyNotFound(Some(old_key.to_owned())))?;
+
+        self.config.state.insert(new_key.to_string(), value);
+        self.config.save()?;
+
+        Ok((old_key.to_owned(), new_key.to_owned()))
+    }
+
+    fn infer_key_from_branch(&self) -> Result<String> {
+        let current_branch = get_current_branch()?;
+        let current_branch = current_branch.trim();
+
+        let branch_matches: Vec<&str> = self
+            .config
+            .state
+            .iter()
+            .filter(|(_, value)| value.as_str() == current_branch)
+            .map(|(key, _)| key.as_str())
+            .collect();
+
+        match branch_matches.as_slice() {
+            [key] => Ok((*key).to_owned()),
+            [] => Err(GFBError::KeyNotFound(None)),
+            _ => Err(GFBError::AmbiguousKey()),
+        }
     }
 }
