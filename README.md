@@ -1,6 +1,6 @@
 # Git Favorite Branch
 
-Remember a branch name under a short key, then reuse that name in any repository. Save the branch you are on with `gfb add <key>`. In another repository, `gfb use <key>` checks that branch out, and `gfb new <key>` creates it with the same name. 
+Tiny CLI to check out the same branch in every repo without retyping the name. Save the branch you are on with `gfb add <key>`. In another repository, `gfb use <key>` checks that branch out, and `gfb new <key>` creates it with the same name. 
 
 The keys you create are saved in a global file and become available to be reused on multiple git repositories.
 
@@ -68,6 +68,7 @@ Commands:
   new      Create a new branch that is named with a value for a given key
   ls       List all favorite branches
   rename   Rename a saved key
+  sync     Syncronize another branch with the current one. Essentially perform a merge
   help     Print this message or the help of the given subcommand(s)
 
 Options:

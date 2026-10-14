@@ -1,7 +1,7 @@
 [package]
 authors = ["Revent Studio", "Maks Yadvinskyy <maks@revent.studio>"]
 categories = ["command-line-utilities"]
-description = "Tiny CLI for enforcing branching name strategy across multiple git repositories"
+description = "Tiny CLI to check out the same branch in every repo without retyping the name"
 edition = "2021"
 homepage = "https://github.com/vepr-ua/git-favorite-branch"
 keywords = ["git_tool", "branch", "git_branch", "multibranch", "managment"]

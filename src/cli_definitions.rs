@@ -40,4 +40,6 @@ pub enum Commands {
         #[arg(required = true, num_args = 1..=2, value_name = "KEY")]
         keys: Vec<String>,
     },
+    /// Syncronize another branch with the current one. Essentially perform a merge.
+    Sync { key: String },
 }

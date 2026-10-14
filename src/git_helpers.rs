@@ -51,3 +51,11 @@ pub fn get_local_hash() -> Result<Output> {
         .output()
         .map_err(|e| GFBError::IOError(e))
 }
+
+pub fn merge_branch(branch_name: &str) -> Result<ExitStatus> {
+    Command::new("sh")
+        .arg("-c")
+        .arg(format!("git merge {}", branch_name))
+        .status()
+        .map_err(|e| GFBError::IOError(e))
+}

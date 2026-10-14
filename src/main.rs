@@ -65,6 +65,10 @@ fn run() -> Result<()> {
             let (old_key, new_key) = cmd_manager.rename_key(input_new_key, input_old_key)?;
             println!("Renamed key from '{}' to '{}'", old_key, new_key);
         }
+        Commands::Sync { key } => {
+            let key = key.trim();
+            cmd_manager.sync_branch(key)?;
+        }
     };
 
     Ok(())

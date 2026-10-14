@@ -1,7 +1,7 @@
 use crate::{
     config::Config,
     errors::{GFBError, Result},
-    git_helpers::{create_branch, get_current_branch, switch_branch},
+    git_helpers::{create_branch, get_current_branch, merge_branch, switch_branch},
 };
 use std::collections::HashMap;
 
@@ -114,5 +114,15 @@ impl CommandManager {
             [] => Err(GFBError::KeyNotFound(None)),
             _ => Err(GFBError::AmbiguousKey()),
         }
+    }
+
+    pub fn sync_branch(&self, key: &str) -> Result<()> {
+        let Some(found_branch) = self.config.state.get(key) else {
+            return Err(GFBError::KeyNotFound(Some(key.to_owned())));
+        };
+
+        merge_branch(found_branch)?;
+
+        Ok(())
     }
 }
