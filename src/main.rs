@@ -55,6 +55,20 @@ fn run() -> Result<()> {
             }
             None => println!("No favorite branches saved"),
         },
+        Commands::Rename { keys } => {
+            let (input_new_key, input_old_key) = match keys.as_slice() {
+                [new_key] => (new_key.as_str().trim(), None),
+                [old_key, new_key] => (new_key.as_str().trim(), Some(old_key.as_str().trim())),
+                _ => unreachable!("Command requires either new key or both new and old keys"),
+            };
+
+            let (old_key, new_key) = cmd_manager.rename_key(input_new_key, input_old_key)?;
+            println!("Renamed key from '{}' to '{}'", old_key, new_key);
+        }
+        Commands::Sync { key } => {
+            let key = key.trim();
+            cmd_manager.sync_branch(key)?;
+        }
     };
 
     Ok(())
