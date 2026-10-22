@@ -5,7 +5,7 @@ use gfb::{
     config::Config,
     errors::Result,
     get_default_path,
-    git_helpers::get_current_branch,
+    git::{contract::GitProvider, shell::GitShell},
 };
 use std::collections::HashMap;
 
@@ -21,14 +21,21 @@ fn run() -> Result<()> {
     let mut config = Config::new(&default_path, HashMap::new());
     config.load()?;
 
-    let mut cmd_manager = CommandManager { config };
+    let git_provider = GitShell {};
+    let active_branch = git_provider.get_current_branch()?;
+
+    let mut cmd_manager = CommandManager {
+        config,
+        git: Box::new(git_provider),
+    };
+
     let cli = Cli::parse();
 
     match &cli.command {
         Commands::Add { key, branch_name } => {
             let branch = match branch_name {
                 Some(v) => v.trim().to_owned(),
-                None => get_current_branch()?.trim().to_owned(),
+                None => active_branch,
             };
 
             cmd_manager.add_branch(key.trim().to_owned(), branch)?;
@@ -42,8 +49,7 @@ fn run() -> Result<()> {
                 println!("{}", branch_name);
             }
             None => {
-                let current_branch_name = get_current_branch()?;
-                println!("{}", current_branch_name);
+                println!("{}", active_branch);
             }
         },
         Commands::New { key } => cmd_manager.create_new_branch(key.trim().to_owned())?,

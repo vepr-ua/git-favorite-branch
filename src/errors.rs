@@ -1,3 +1,4 @@
+use crate::git::error::GitError;
 use std::fmt;
 
 #[derive(Debug)]
@@ -11,6 +12,7 @@ pub enum GFBError {
     ConfigCreateFailed(String),
     CurrentBranchResolveFailed(String),
     IOError(std::io::Error),
+    Git(GitError),
 }
 
 impl fmt::Display for GFBError {
@@ -30,11 +32,26 @@ impl fmt::Display for GFBError {
                 write!(f, "Failed to get current branch: {}", msg)
             }
             GFBError::IOError(error) => write!(f, "IO error: {}", error),
+            GFBError::Git(error) => write!(f, "{}", error),
         }
     }
 }
 
-impl std::error::Error for GFBError {}
+impl std::error::Error for GFBError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            GFBError::Git(error) => Some(error),
+            GFBError::IOError(error) => Some(error),
+            _ => None,
+        }
+    }
+}
+
+impl From<GitError> for GFBError {
+    fn from(value: GitError) -> Self {
+        GFBError::Git(value)
+    }
+}
 
 impl From<std::io::Error> for GFBError {
     fn from(value: std::io::Error) -> Self {

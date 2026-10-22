@@ -1,12 +1,10 @@
-use std::{env, path::Path, process};
-
-use git_helpers::get_local_hash;
+use std::{env, path::Path};
 
 pub mod cli_definitions;
 pub mod command_manager;
 pub mod config;
 pub mod errors;
-pub mod git_helpers;
+pub mod git;
 
 pub fn get_default_path() -> String {
     let ref home_dir = env::var("HOME").unwrap_or("".to_string());
@@ -23,20 +21,4 @@ pub fn get_default_path() -> String {
         }
     };
     String::from(default_path.to_str().unwrap())
-}
-
-pub fn get_build_hash() -> String {
-    match option_env!("GITHUB_SHA") {
-        Some(github_hash) => String::from(github_hash),
-        None => match get_local_hash() {
-            Ok(output) => String::from_utf8(output.stdout).unwrap_or_else(|err| {
-                eprintln!("Error parsing commit hash: {}", err);
-                process::exit(1);
-            }),
-            Err(err) => {
-                eprintln!("Could not get local hash: {}", err);
-                String::from("")
-            }
-        },
-    }
 }

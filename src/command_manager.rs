@@ -1,12 +1,19 @@
 use crate::{
     config::Config,
     errors::{GFBError, Result},
-    git_helpers::{create_branch, get_current_branch, merge_branch, switch_branch},
+    git::contract::GitProvider,
 };
 use std::collections::HashMap;
 
 pub struct CommandManager {
     pub config: Config,
+    /// Using a dynamic dispatch to keep a provider is not
+    /// the fastest approach compared to generics, but also
+    /// this feels more correct and we aren't optimizing
+    /// for speed. Simply because any IO operations would
+    /// take much longer compared to allocating a git provider
+    /// on the heap. Feel free to convince me otherwise.
+    pub git: Box<dyn GitProvider>,
 }
 
 impl CommandManager {
@@ -20,7 +27,7 @@ impl CommandManager {
             return Err(GFBError::KeyNotFound(Some(key)))?;
         };
 
-        switch_branch(branch_name)?;
+        self.git.switch_branch(branch_name)?;
 
         Ok(())
     }
@@ -40,7 +47,7 @@ impl CommandManager {
             .get(&key)
             .ok_or_else(|| GFBError::KeyNotFound(Some(key)))?;
 
-        create_branch(branch_name)?;
+        self.git.create_branch(branch_name)?;
         Ok(())
     }
 
@@ -98,7 +105,7 @@ impl CommandManager {
     }
 
     fn infer_key_from_branch(&self) -> Result<String> {
-        let current_branch = get_current_branch()?;
+        let current_branch = self.git.get_current_branch()?;
         let current_branch = current_branch.trim();
 
         let branch_matches: Vec<&str> = self
@@ -121,8 +128,7 @@ impl CommandManager {
             return Err(GFBError::KeyNotFound(Some(key.to_owned())));
         };
 
-        merge_branch(found_branch)?;
-
+        self.git.merge_branch(found_branch)?;
         Ok(())
     }
 }
