@@ -5,7 +5,7 @@ use gfb::{
     config::Config,
     errors::Result,
     get_default_path,
-    git::{contract::GitProvider, shell::GitShell},
+    git::{contract::GitProvider, gitlib2},
 };
 use std::collections::HashMap;
 
@@ -21,7 +21,8 @@ fn run() -> Result<()> {
     let mut config = Config::new(&default_path, HashMap::new());
     config.load()?;
 
-    let git_provider = GitShell {};
+    // let git_provider = GitShell {};
+    let git_provider = gitlib2::GitLib::new_with_repo(None)?;
     let active_branch = git_provider.get_current_branch()?;
 
     let mut cmd_manager = CommandManager {
