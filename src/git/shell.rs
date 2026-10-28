@@ -2,9 +2,10 @@ use std::process::Command;
 
 use crate::git::{contract::GitProvider, error::GitError};
 
-#[deprecated]
+#[deprecated(since = "1.3.0", note = "use `git::gitlib2::GitLib` instead")]
 pub struct GitShell {}
 
+#[expect(deprecated)]
 impl GitProvider for GitShell {
     fn get_current_branch(&self) -> super::result::GitResult<String> {
         let branch_name_raw = Command::new("sh")
