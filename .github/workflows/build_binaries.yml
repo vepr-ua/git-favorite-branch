@@ -10,7 +10,7 @@ env:
 
 jobs:
   test:
-    runs-on: macos-lastes
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
