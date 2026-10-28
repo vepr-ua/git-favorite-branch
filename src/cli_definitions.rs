@@ -40,6 +40,9 @@ pub enum Commands {
         #[arg(required = true, num_args = 1..=2, value_name = "KEY")]
         keys: Vec<String>,
     },
-    /// Syncronize another branch with the current one. Essentially perform a merge.
+    /// Synchronize another branch with the current one. Both branches must exist in the same repository for a merge to occur.
+    ///
+    /// `gfb sync <KEY>` merges the branch saved under `<KEY>` into the branch
+    /// you are on. Both of those branches must already exist in this repository.
     Sync { key: String },
 }

@@ -68,7 +68,7 @@ Commands:
   new      Create a new branch that is named with a value for a given key
   ls       List all favorite branches
   rename   Rename a saved key
-  sync     Syncronize another branch with the current one. Essentially perform a merge
+  sync     Synchronize another branch with the current one. Both branches must exist in the same repository for a merge to occur
   help     Print this message or the help of the given subcommand(s)
 
 Options:
