@@ -1,6 +1,9 @@
 #!/bin/bash
 
 set -e
+###
+### This script is deprecated and no longer being used.
+###
 
 # Get new version from the tag
 tag_version=$(git tag --points-at HEAD | grep -m 1 "^release/v.*" || true)
