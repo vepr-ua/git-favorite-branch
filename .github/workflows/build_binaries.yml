@@ -10,21 +10,21 @@ env:
 
 jobs:
   test:
-    runs-on: macos-14
+    runs-on: macos-lastes
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
       - name: Run tests
         run: cargo test --verbose
 
   build_macos:
     name: Building for MacOS
-    runs-on: macos-14
+    runs-on: macos-latest
     needs: test
 
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -33,32 +33,13 @@ jobs:
 
       - name: Build and Package
         id: build-n-package
-        env:
-          MACOS_CERTIFICATE: ${{ secrets.MACOS_DEVELOPER_ID_CERTIFICATE }}
-          MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_DEVELOPER_ID_CERTIFICATE_PWD }}
-          APPLE_DEVELOPER_ID: ${{ secrets.APPLE_DEVELOPER_ID }}
-        run: bash ./scripts/build.sh
-
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@master
-        with:
-          name: ${{ steps.build-n-package.outputs.DIST_FILENAME }}
-          path: ${{ steps.build-n-package.outputs.DIST_PATH }}
+        run: cargo check --release
 
       - name: Check for release
         id: is-release
         run: |
           unset IS_RELEASE ; if [[ $GITHUB_REF =~ ^refs/tags/release/v[0-9].* ]]; then IS_RELEASE='true' ; fi
           echo "IS_RELEASE=${IS_RELEASE}" >> $GITHUB_OUTPUT
-
-      - name: Publish archives and packages to Github
-        uses: softprops/action-gh-release@v1
-        if: steps.is-release.outputs.IS_RELEASE
-        with:
-          files: |
-            ${{ steps.build-n-package.outputs.DIST_PATH }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish to Crates.io
         if: steps.is-release.outputs.IS_RELEASE

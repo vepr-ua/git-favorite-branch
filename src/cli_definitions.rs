@@ -27,4 +27,22 @@ pub enum Commands {
     New { key: String },
     /// List all favorite branches
     Ls,
+    /// Rename a saved key
+    ///
+    /// `gfb rename <NEW_KEY>` renames the key saved for the branch you are on.
+    /// That branch must be saved under exactly one key.
+    ///
+    /// `gfb rename <OLD_KEY> <NEW_KEY>` renames a key by name, from anywhere.
+    ///
+    /// The new key must not already exist.
+    #[command(override_usage = "gfb rename <NEW_KEY>\n       gfb rename <OLD_KEY> <NEW_KEY>")]
+    Rename {
+        #[arg(required = true, num_args = 1..=2, value_name = "KEY")]
+        keys: Vec<String>,
+    },
+    /// Synchronize another branch with the current one. Both branches must exist in the same repository for a merge to occur.
+    ///
+    /// `gfb sync <KEY>` merges the branch saved under `<KEY>` into the branch
+    /// you are on. Both of those branches must already exist in this repository.
+    Sync { key: String },
 }
