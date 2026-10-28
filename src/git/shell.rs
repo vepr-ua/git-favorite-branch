@@ -2,6 +2,7 @@ use std::process::Command;
 
 use crate::git::{contract::GitProvider, error::GitError};
 
+#[deprecated]
 pub struct GitShell {}
 
 impl GitProvider for GitShell {

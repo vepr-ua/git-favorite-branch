@@ -21,7 +21,6 @@ fn run() -> Result<()> {
     let mut config = Config::new(&default_path, HashMap::new());
     config.load()?;
 
-    // let git_provider = GitShell {};
     let git_provider = gitlib2::GitLib::new_with_repo(None)?;
     let active_branch = git_provider.get_current_branch()?;
 
